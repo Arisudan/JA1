@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>OBD Car Logger Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding: 10px;
+            margin: 0;
+            box-sizing: border-box;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+
+        .dashboard {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e1e5e9;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header-left {
+            text-align: center;
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.2rem;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .header-right {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            margin: 10px;
+        }
+
+        .status-connected {
+            background: #28a745;
+            border: 1px solid #1e7e34;
+        }
+
+        .status-disconnected {
+            background: #dc3545;
+            border: 1px solid #bd2130;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .metric-card {
+            background: #ffffff;
+            border-radius: 6px;
+            padding: 25px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+            transition: box-shadow 0.3s ease;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .metric-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .metric-title {
+            color: #6c757d;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-value {
+            color: #2c3e50;
+            font-size: 2.8rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .metric-unit {
+            color: #6c757d;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: #007bff;
+            color: white;
+            border: 1px solid #0056b3;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            border: 1px solid #545b62;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            border: 1px solid #bd2130;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .log-section {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #dee2e6;
+        }
+
+        .log-header {
+            color: #2c3e50;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .log-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+            color: #2c3e50;
+            margin: 10px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: block;
+            color: #007bff;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #6c757d;
+            font-weight: 500;
+        }
+
+        .download-section {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 0.875rem;
+            border-radius: 4px;
+        }
+
+        @media (max-width: 992px) {
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .header-left {
+                order: 1;
+            }
+            
+            .header-right {
+                order: 3;
+                justify-content: center;
+            }
+            
+            .status-indicator {
+                order: 2;
+                margin-bottom: 15px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                padding: 20px 15px;
+                margin: 10px;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 15px;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .metric-value {
+                font-size: 2rem;
+            }
+            
+            .metric-card {
+                padding: 20px 15px;
+            }
+            
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            .header-right {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .btn-sm {
+                width: 100%;
+                margin-bottom: 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .dashboard {
+                padding: 15px 10px;
+                margin: 5px;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .metric-value {
+                font-size: 1.8rem;
+            }
+            
+            .metric-title {
+                font-size: 1rem;
+            }
+            
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .log-stats {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        .loading {
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+        }
+
+        .error {
+            text-align: center;
+            color: #dc3545;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <div style="position: relative; text-align: center; margin-bottom: 30px;">
+            <h1 style="color: #2c3e50; font-size: 2.2rem; margin: 0; font-weight: 600;">OBD Diagnostic Logger</h1>
+            <div style="position: absolute; top: 0; right: 0; display: flex; gap: 10px;">
+                <button class="btn btn-primary btn-sm" onclick="downloadCSV()">Download CSV</button>
+            </div>
+        </div>
+        
+        <div style="text-align: center; margin-bottom: 30px;">
+            <div class="status-indicator" id="connectionStatus">
+                Connecting...
+            </div>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-title">Engine RPM</div>
+                <div class="metric-value" id="rpmValue">----</div>
+                <div class="metric-unit">RPM</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-title">Vehicle Speed</div>
+                <div class="metric-value" id="speedValue">----</div>
+                <div class="metric-unit">km/h</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-title">Coolant Temperature</div>
+                <div class="metric-value" id="coolantValue">----</div>
+                <div class="metric-unit">°C</div>
+            </div>
+
+            <div class="metric-card">
+                <div class="metric-title">Oil Temperature</div>
+                <div class="metric-value" id="oilValue">----</div>
+                <div class="metric-unit">°C</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn btn-primary" onclick="startLogging()">Start Logging</button>
+            <button class="btn btn-danger" onclick="stopLogging()">Stop Logging</button>
+            <button class="btn btn-secondary" onclick="clearData()">Clear Data</button>
+        </div>
+
+        <div class="log-section">
+            <div class="log-header">Data Logging Statistics</div>
+            <div class="log-stats">
+                <div class="stat-item">
+                    <span class="stat-value" id="totalRecords">0</span>
+                    <span class="stat-label">Total Records</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="logDuration">00:00:00</span>
+                    <span class="stat-label">Log Duration</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value" id="lastUpdate">Never</span>
+                    <span class="stat-label">Last Update</span>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let isLogging = false;
+        let logStartTime = null;
+        let updateInterval = null;
+        let durationInterval = null;
+        let currentData = {
+            rpm: 0,
+            speed: 0,
+            coolant: 0,
+            oil: 'N/A',
+            connected: false,
+            totalRecords: 0
+        };
+
+        // Backend API base URL
+        const API_BASE = '/api';
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDashboard();
+        });
+
+        function initializeDashboard() {
+            updateConnectionStatus(false);
+            startDataUpdates();
+        }
+
+        function updateConnectionStatus(connected) {
+            const statusElement = document.getElementById('connectionStatus');
+            currentData.connected = connected;
+            
+            if (connected) {
+                statusElement.textContent = 'Connected';
+                statusElement.className = 'status-indicator status-connected';
+            } else {
+                statusElement.textContent = 'Disconnected';
+                statusElement.className = 'status-indicator status-disconnected';
+            }
+        }
+
+        function startDataUpdates() {
+            // Real-time data updates from backend
+            updateInterval = setInterval(async () => {
+                try {
+                    await fetchCurrentData();
+                    await fetchStats();
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                    updateConnectionStatus(false);
+                }
+            }, 500); // Update every 500ms
+
+            // Duration timer
+            durationInterval = setInterval(updateDuration, 1000);
+        }
+
+        async function fetchCurrentData() {
+            try {
+                const response = await fetch(`${API_BASE}/status`);
+                if (!response.ok) throw new Error('Failed to fetch data');
+                
+                const data = await response.json();
+                currentData = {
+                    rpm: data.rpm || 0,
+                    speed: data.speed || 0,
+                    coolant: data.coolant || 0,
+                    oil: data.oil || 'N/A',
+                    connected: data.connected || false,
+                    totalRecords: data.total_records || 0
+                };
+                
+                isLogging = data.is_logging || false;
+                if (data.log_start_time && !logStartTime) {
+                    logStartTime = new Date(data.log_start_time);
+                }
+                
+                updateDashboard();
+                updateConnectionStatus(currentData.connected);
+                
+            } catch (error) {
+                console.error('Error fetching current data:', error);
+                updateConnectionStatus(false);
+            }
+        }
+
+        async function fetchStats() {
+            try {
+                const response = await fetch(`${API_BASE}/stats`);
+                if (!response.ok) throw new Error('Failed to fetch stats');
+                
+                const stats = await response.json();
+                document.getElementById('totalRecords').textContent = stats.total_records || 0;
+                
+                if (stats.last_update) {
+                    const lastUpdate = new Date(stats.last_update);
+                    document.getElementById('lastUpdate').textContent = lastUpdate.toLocaleTimeString();
+                }
+                
+            } catch (error) {
+                console.error('Error fetching stats:', error);
+            }
+        }
+
+        function updateDashboard() {
+            document.getElementById('rpmValue').textContent = currentData.rpm;
+            document.getElementById('speedValue').textContent = currentData.speed;
+            document.getElementById('coolantValue').textContent = currentData.coolant;
+            document.getElementById('oilValue').textContent = currentData.oil;
+        }
+
+        async function startLogging() {
+            if (!currentData.connected) {
+                alert('Cannot start logging: Not connected to OBD device');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/start_logging`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    isLogging = true;
+                    logStartTime = new Date(result.start_time);
+                    alert('Logging started successfully.');
+                } else {
+                    const error = await response.json();
+                    alert(`Failed to start logging: ${error.error}`);
+                }
+            } catch (error) {
+                console.error('Error starting logging:', error);
+                alert('Error starting logging. Please check the backend connection.');
+            }
+        }
+
+        async function stopLogging() {
+            try {
+                const response = await fetch(`${API_BASE}/stop_logging`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    isLogging = false;
+                    alert(`⏹️ Logging stopped. Total records: ${result.total_records}`);
+                } else {
+                    alert('Failed to stop logging');
+                }
+            } catch (error) {
+                console.error('Error stopping logging:', error);
+                alert('Error stopping logging. Please check the backend connection.');
+            }
+        }
+
+        async function clearData() {
+            if (confirm('🗑️ Are you sure you want to clear all logged data?')) {
+                try {
+                    const response = await fetch(`${API_BASE}/clear_data`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    
+                    if (response.ok) {
+                        logStartTime = null;
+                        document.getElementById('totalRecords').textContent = '0';
+                        document.getElementById('logDuration').textContent = '00:00:00';
+                        alert('Data cleared successfully!');
+                    } else {
+                        alert('Failed to clear data');
+                    }
+                } catch (error) {
+                    console.error('Error clearing data:', error);
+                    alert('Error clearing data. Please check the backend connection.');
+                }
+            }
+        }
+
+        function updateDuration() {
+            if (logStartTime && isLogging) {
+                const now = new Date();
+                const diff = now - logStartTime;
+                const hours = Math.floor(diff / 3600000);
+                const minutes = Math.floor((diff % 3600000) / 60000);
+                const seconds = Math.floor((diff % 60000) / 1000);
+                
+                document.getElementById('logDuration').textContent = 
+                    `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+        }
+
+        async function downloadCSV() {
+            try {
+                const response = await fetch(`${API_BASE}/download/csv`);
+                if (!response.ok) {
+                    const error = await response.json();
+                    alert(`❌ ${error.error}`);
+                    return;
+                }
+                
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = response.headers.get('content-disposition')?.split('filename=')[1] || 'obd_data.csv';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                
+                alert('CSV file downloaded successfully!');
+                
+            } catch (error) {
+                console.error('Error downloading CSV:', error);
+                alert('Error downloading CSV file. Please check the backend connection.');
+            }
+        }
+
+
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            if (updateInterval) clearInterval(updateInterval);
+            if (durationInterval) clearInterval(durationInterval);
+        });
+
+        // Check backend connectivity on load
+        async function checkBackendConnection() {
+            try {
+                const response = await fetch(`${API_BASE}/status`);
+                return response.ok;
+            } catch (error) {
+                return false;
+            }
+        }
+
+        // Show connection status
+        setTimeout(async () => {
+            const connected = await checkBackendConnection();
+            if (!connected) {
+                document.getElementById('connectionStatus').textContent = '⚠️ Backend Offline';
+                document.getElementById('connectionStatus').className = 'status-indicator status-disconnected';
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
