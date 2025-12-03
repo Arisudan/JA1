@@ -1,0 +1,13 @@
+psg@raspberrypi:~/New $ source myenv/bin/activate
+(myenv) psg@raspberrypi:~/New $ python3 loger2.py 
+[obd.elm327] Could not open port socket://192.168.0.10:35000: timed out
+[obd.obd] Cannot load commands: No connection to car
+Connection failed. Check WiFi, ignition, IP and port.
+(myenv) psg@raspberrypi:~/New $ python3 loger2.py 
+Connected (async/watch mode).
+Traceback (most recent call last):
+  File "/home/psg/New/loger2.py", line 56, in <module>
+    connection.watch(CMD_RPM, callback=cb_rpm)
+    ^^^^^^^^^^^^^^^^
+AttributeError: 'OBD' object has no attribute 'watch'
+(myenv) psg@raspberrypi:~/New $ 
