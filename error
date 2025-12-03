@@ -11,3 +11,13 @@ Traceback (most recent call last):
     ^^^^^^^^^^^^^^^^
 AttributeError: 'OBD' object has no attribute 'watch'
 (myenv) psg@raspberrypi:~/New $ 
+
+
+
+(myenv) psg@raspberrypi:~/New $ python3 final.py
+  File "/home/psg/New/final.py", line 12
+    WIFI_SSID = "WIFI_OBDII"    # CHANGE THIS to your dongle's name
+                            ^
+SyntaxError: invalid non-printable character U+00A0
+(myenv) psg@raspberrypi:~/New $ 
+
