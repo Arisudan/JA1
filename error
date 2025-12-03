@@ -21,3 +21,4 @@ AttributeError: 'OBD' object has no attribute 'watch'
 SyntaxError: invalid non-printable character U+00A0
 (myenv) psg@raspberrypi:~/New $ 
 
+tr -d '\u00A0' < final.py > clean.py && mv clean.py final.py
