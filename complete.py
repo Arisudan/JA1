@@ -8,8 +8,8 @@ import os
 from datetime import datetime
 
 # --- CONFIGURATION ---
-WIFI_SSID = "WiFi_OBDII"  # CHANGE THIS to your dongle's name
-WIFI_PASS = "12345678"    # CHANGE THIS to your dongle's password (usually 1234 or 12345678)
+WIFI_SSID = "WIFI_OBDII"  # CHANGE THIS to your dongle's name
+#WIFI_PASS = "12345678"    # CHANGE THIS to your dongle's password (usually 1234 or 12345678)
 OBD_PORT = "socket://192.168.0.10:35000"
 
 # --- THE DASHBOARD APP ---
@@ -82,7 +82,7 @@ class CarDashboard(ctk.CTk):
         self.update()
         
         # Run terminal command to connect
-        cmd = f'nmcli dev wifi connect "{WIFI_SSID}" password "{WIFI_PASS}"'
+        cmd = f'nmcli dev wifi connect "{WIFI_SSID}"'
         try:
             subprocess.run(cmd, shell=True, check=True)
             self.lbl_status.configure(text=f"WiFi Connected to {WIFI_SSID}", text_color="green")
